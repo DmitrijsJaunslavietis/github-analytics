@@ -1,0 +1,1 @@
+yarn android && yarn start

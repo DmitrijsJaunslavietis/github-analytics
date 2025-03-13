@@ -6,10 +6,12 @@ import { useTokenStorage } from "../../../services/useTokenStorage";
 import { http } from "../../../services/http";
 import { useQuery } from "@apollo/client";
 import { GET_REPOSITORY } from "../../../graphql/queries/fetchRepositoryQuery";
+import { ApolloProviderWrapper } from "../../../graphql/ApolloProviderWrapper";
+import { DashboardScreen } from "../../dashboard/DashboardScreen";
 
 export const LoginScreen = () => {
     const { loggedIn, setLoggedIn } = useContext(LoggedInContext);
-    const { data, loading, error } = useQuery(GET_REPOSITORY);
+    // const { data, loading, error } = useQuery(GET_REPOSITORY);
 
     const { removeToken } = useTokenStorage();
     const [clientID, setClientID] = useState<string | undefined>(undefined);
@@ -18,20 +20,10 @@ export const LoginScreen = () => {
         setClientID(process.env.CLIENT_ID);
     }
 
-    const handleClickLogoff = () => {
-        removeToken().then((result) => {
-            setLoggedIn(!result);
-        });
-    }
-
     useEffect(() => {
-        if (!!!http.defaults.headers.Authorization) return;
+        if (!!!http.defaults.headers.Authorization || !loggedIn) return;
         http.get("user")
-    }, [http]);
-
-    useEffect(() => {
-        console.log('data', data);
-    }, [data])
+    }, [http, loggedIn]);
 
     return <View style={[{ flex: 1 }]}>
         <StatusBar
@@ -39,27 +31,9 @@ export const LoginScreen = () => {
         />
         {
             loggedIn
-                ? <View>
-                    <Text>Logged in you are indeed!</Text>
-                    <TouchableOpacity
-                        onPress={() => {
-                            console.log('logoff');
-                            handleClickLogoff();
-                        }}
-                        style={{
-                            backgroundColor: 'black',
-                            padding: 10,
-                            paddingHorizontal: 20,
-                            borderRadius: 5,
-                            height: 50,
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                        }}
-                    >
-                        <Text style={{ color: 'white' }}>logoff</Text>
-                    </TouchableOpacity>
-                    <Text>{JSON.stringify(data)}</Text>
-                </View>
+                ? <ApolloProviderWrapper>
+                    <DashboardScreen />
+                </ApolloProviderWrapper>
                 : <View
                     style={{
                         flex: 1,

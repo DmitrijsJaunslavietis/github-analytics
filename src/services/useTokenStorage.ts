@@ -45,14 +45,13 @@ export const useTokenStorage = (): ITokenStorage => {
   };
 
   const getToken = async () => {
-    let value = null;
-    try {
-      await RNSecureStorage.getItem(`bearer`).then((result) => {
-        value = result;
-      });
-    } catch (e) {
+    const value = await RNSecureStorage.getItem(`bearer`).then((result) => {
+      return result;
+    }).catch((e) => {
       console.log("getToken error", e);
-    }
+      return null;
+    });
+
     return value;
   };
   return { haveToken, setToken, getToken, removeToken };
